@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Prakan - ท่องเที่ยวสมุทรปราการ</title>
+    <!-- Tailwind CSS สำหรับดีไซน์ที่ทันสมัย -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Sarabun -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <!-- Animate.css สำหรับลูกเล่นตอนเข้าเว็บ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow-x: hidden; }
+        .hero-gradient { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1596401057633-53a048a7664c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .admin-only { display: none; }
+        .district-card:hover { transform: translateY(-5px); transition: 0.3s; }
+        #welcomePopup { z-index: 9999; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- 1. ป๊อปอัพประกาศ (Popup Message) -->
+    <div id="welcomePopup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 animate__animated animate__zoomIn text-center relative">
+            <div class="text-blue-600 text-5xl mb-4"><i class="fas fa-bullhorn"></i></div>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">ยินดีต้อนรับสู่ Guide Prakan</h2>
+            <p class="text-gray-600 mb-6">เว็บไซต์แนะนำสถานที่ท่องเที่ยวจังหวัดสมุทรปราการฉบับใหม่ ทันสมัยกว่าเดิม!</p>
+            <button onclick="closePopup()" class="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition font-bold w-full">เข้าชมเว็บไซต์</button>
+        </div>
+    </div>
+
+    <!-- 2. แถบเมนู (Navbar) -->
+    <nav class="glass fixed w-full z-50 shadow-sm border-b border-gray-100">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-xl shadow-lg">GP</div>
+                <span class="text-2xl font-black text-blue-900 tracking-tighter">Guide Prakan</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="loginBtn" onclick="openLoginModal()" class="text-gray-600 hover:text-blue-600 font-bold transition">
+                    <i class="fas fa-user-lock"></i> จัดการข้อมูล
+                </button>
+                <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded-lg font-bold">ออกจากระบบ</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3. Hero Section -->
+    <header class="hero-gradient h-[500px] flex items-center justify-center text-center text-white px-4 pt-20">
+        <div class="animate__animated animate__fadeInUp">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">สมุทรปราการ เมืองน่าเที่ยว</h1>
+            <p class="text-xl md:text-2xl font-light max-w-2xl mx-auto">สัมผัสเสน่ห์เมืองปากน้ำ ครบเครื่องเรื่องเที่ยว พักผ่อน และวัฒนธรรม</p>
+        </div>
+    </header>
+
+    <!-- 4. ส่วนแสดงเนื้อหา (Main) -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">สำรวจ 6 อำเภอ</h2>
+                <div class="h-1 w-20 bg-blue-600 mt-2"></div>
+            </div>
+            <button onclick="openAddModal()" class="admin-only bg-green-500 text-white px-6 py-3 rounded-xl font-bold mt-4 md:mt-0 shadow-lg hover:bg-green-600 transition">
+                <i class="fas fa-plus-circle"></i> เพิ่มสถานที่ใหม่
+            </button>
+        </div>
+
+        <!-- รายชื่ออำเภอ -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16 text-center">
+            <button onclick="filterByDistrict('อำเภอเมืองสมุทรปราการ')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">เมืองสมุทรปราการ</button>
+            <button onclick="filterByDistrict('อำเภอบางบ่อ')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">บางบ่อ</button>
+            <button onclick="filterByDistrict('อำเภอบางพลี')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">บางพลี</button>
+            <button onclick="filterByDistrict('อำเภอพระประแดง')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">พระประแดง</button>
+            <button onclick="filterByDistrict('อำเภอพระสมุทรเจดีย์')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">พระสมุทรเจดีย์</button>
+            <button onclick="filterByDistrict('อำเภอบางเสาธง')" class="district-card p-4 bg-white rounded-2xl shadow-sm border border-gray-100 font-bold hover:bg-blue-50 text-blue-800">บางเสาธง</button>
+        </div>
+
+        <!-- รายการสถานที่ท่องเที่ยว -->
+        <div id="placesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- ข้อมูลจะถูกโหลดที่นี่ด้วย JavaScript -->
+        </div>
+    </main>
+
+    <!-- 5. ฟุตเตอร์ (Footer) -->
+    <footer class="bg-blue-900 text-white py-12 px-6">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div>
+                <h3 class="text-2xl font-bold mb-4">Guide Prakan</h3>
+                <p class="text-blue-200">รวบรวมข้อมูลท่องเที่ยวสมุทรปราการให้เข้าถึงง่าย ทันสมัย และครบถ้วนที่สุด</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold mb-4">ติดต่อเรา</h3>
+                <p class="mb-2"><i class="fas fa-phone mr-2"></i> 065-748-1795</p>
+                <p><i class="fas fa-envelope mr-2"></i> gdger20@gmail.com</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold mb-4">เกี่ยวกับเรา</h3>
+                <p class="text-blue-200 text-sm">จัดทำขึ้นเพื่อส่งเสริมการท่องเที่ยวในจังหวัดสมุทรปราการ โดยรวบรวมสถานที่เด็ดของทั้ง 6 อำเภอไว้ที่เดียว</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals (ซ่อนอยู่) -->
+    <!-- Modal: Login -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full animate__animated animate__fadeInDown">
+            <h2 class="text-2xl font-bold mb-4">เข้าสู่ระบบแอดมิน</h2>
+            <input type="password" id="adminPass" placeholder="กรอกรหัสแก้ไขข้อมูล" class="w-full border p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-600 outline-none">
+            <div class="flex space-x-2">
+                <button onclick="login()" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold">ยืนยัน</button>
+                <button onclick="closeModals()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Place -->
+    <div id="placeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate__animated animate__fadeInUp">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6">เพิ่มสถานที่ท่องเที่ยว</h2>
+            <div class="space-y-4">
+                <input type="hidden" id="editIndex">
+                <div>
+                    <label class="block text-sm font-bold mb-1">อำเภอ</label>
+                    <select id="pDistrict" class="w-full border p-3 rounded-lg">
+                        <option>อำเภอเมืองสมุทรปราการ</option>
+                        <option>อำเภอบางบ่อ</option>
+                        <option>อำเภอบางพลี</option>
+                        <option>อำเภอพระประแดง</option>
+                        <option>อำเภอพระสมุทรเจดีย์</option>
+                        <option>อำเภอบางเสาธง</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">ชื่อสถานที่</label>
+                    <input type="text" id="pName" placeholder="เช่น ฟาร์มจระเข้" class="w-full border p-3 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">รายละเอียด</label>
+                    <textarea id="pDesc" rows="3" placeholder="ระบุข้อมูลที่น่าสนใจ" class="w-full border p-3 rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">URL รูปภาพ</label>
+                    <input type="text" id="pImg" placeholder="https://example.com/image.jpg" class="w-full border p-3 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">URL Google Maps</label>
+                    <input type="text" id="pMap" placeholder="https://goo.gl/maps/..." class="w-full border p-3 rounded-lg">
+                </div>
+                <div class="flex space-x-2 pt-4">
+                    <button onclick="savePlace()" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold">บันทึกข้อมูล</button>
+                    <button onclick="closeModals()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold">ยกเลิก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // "ฐานข้อมูล" (ใช้ LocalStorage)
+        let places = JSON.parse(localStorage.getItem('gp_database')) || [
+            { district: 'อำเภอเมืองสมุทรปราการ', name: 'หอชมเมืองสมุทรปราการ', desc: 'แลนด์มาร์คสำคัญที่สามารถมองเห็นวิวเมืองปากน้ำได้ 360 องศา', img: 'https://img.thansettakij.com/uploads/images/contents/w1024/2022/08/9zD9z9p39HofQvjM8uVf.webp', map: 'https://goo.gl/maps/example' },
+            { district: 'อำเภอพระประแดง', name: 'คุ้งบางกระเจ้า', desc: 'พื้นที่สีเขียวขนาดใหญ่ ปอดของคนเมือง เหมาะแก่การขี่จักรยานชมธรรมชาติ', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80', map: 'https://goo.gl/maps/example' }
+        ];
+
+        let isAdmin = false;
+
+        function closePopup() {
+            document.getElementById('welcomePopup').classList.add('hidden');
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('placeModal').classList.add('hidden');
+        }
+
+        function login() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === '6242') {
+                isAdmin = true;
+                localStorage.setItem('gp_admin', 'true');
+                checkAdminStatus();
+                closeModals();
+                alert('ยินดีต้อนรับแอดมิน เข้าสู่โหมดแก้ไขข้อมูล');
+            } else {
+                alert('รหัสผ่านไม่ถูกต้อง');
+            }
+        }
+
+        function logout() {
+            isAdmin = false;
+            localStorage.removeItem('gp_admin');
+            checkAdminStatus();
+            location.reload();
+        }
+
+        function checkAdminStatus() {
+            const status = localStorage.getItem('gp_admin');
+            const adminElements = document.querySelectorAll('.admin-only');
+            if (status === 'true') {
+                isAdmin = true;
+                adminElements.forEach(el => el.style.display = 'block');
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+            } else {
+                adminElements.forEach(el => el.style.display = 'none');
+            }
+        }
+
+        function renderPlaces(districtFilter = '') {
+            const container = document.getElementById('placesContainer');
+            container.innerHTML = '';
+
+            const filtered = districtFilter ? places.filter(p => p.district === districtFilter) : places;
+
+            filtered.forEach((place, index) => {
+                const card = `
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden district-card animate__animated animate__fadeIn">
+                        <img src="${place.img}" class="w-full h-56 object-cover" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+                        <div class="p-6">
+                            <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">${place.district}</span>
+                            <h3 class="text-xl font-bold text-gray-800 mt-2 mb-3">${place.name}</h3>
+                            <p class="text-gray-500 text-sm mb-6 leading-relaxed">${place.desc}</p>
+                            <div class="flex items-center justify-between">
+                                <a href="${place.map}" target="_blank" class="flex items-center space-x-2 text-blue-600 font-bold hover:text-blue-800 transition">
+                                    <i class="fas fa-map-marked-alt"></i> <span>ดูบนแผนที่</span>
+                                </a>
+                                <div class="admin-only space-x-2" style="${isAdmin ? 'display:block' : 'display:none'}">
+                                    <button onclick="editPlace(${index})" class="text-yellow-500 hover:text-yellow-600"><i class="fas fa-edit"></i></button>
+                                    <button onclick="deletePlace(${index})" class="text-red-500 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').innerText = 'เพิ่มสถานที่ท่องเที่ยว';
+            document.getElementById('editIndex').value = '';
+            document.getElementById('pName').value = '';
+            document.getElementById('pDesc').value = '';
+            document.getElementById('pImg').value = '';
+            document.getElementById('pMap').value = '';
+            document.getElementById('placeModal').classList.remove('hidden');
+        }
+
+        function savePlace() {
+            const index = document.getElementById('editIndex').value;
+            const newPlace = {
+                district: document.getElementById('pDistrict').value,
+                name: document.getElementById('pName').value,
+                desc: document.getElementById('pDesc').value,
+                img: document.getElementById('pImg').value,
+                map: document.getElementById('pMap').value
+            };
+
+            if (index === '') {
+                places.push(newPlace);
+            } else {
+                places[index] = newPlace;
+            }
+
+            localStorage.setItem('gp_database', JSON.stringify(places));
+            renderPlaces();
+            closeModals();
+        }
+
+        function editPlace(index) {
+            const p = places[index];
+            document.getElementById('modalTitle').innerText = 'แก้ไขข้อมูลสถานที่';
+            document.getElementById('editIndex').value = index;
+            document.getElementById('pDistrict').value = p.district;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pDesc').value = p.desc;
+            document.getElementById('pImg').value = p.img;
+            document.getElementById('pMap').value = p.map;
+            document.getElementById('placeModal').classList.remove('hidden');
+        }
+
+        function deletePlace(index) {
+            if (confirm('ยืนยันที่จะลบข้อมูลสถานที่นี้?')) {
+                places.splice(index, 1);
+                localStorage.setItem('gp_database', JSON.stringify(places));
+                renderPlaces();
+            }
+        }
+
+        function filterByDistrict(name) {
+            renderPlaces(name);
+        }
+
+        // เริ่มต้นโหลดข้อมูล
+        window.onload = () => {
+            checkAdminStatus();
+            renderPlaces();
+        };
+    </script>
+</body>
+</html>
